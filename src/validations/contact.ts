@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const contactSchema = z.object({
+export const ContactSchema = z.object({
   name: z
     .string()
     .min(3, "名前は３文字以上で入力してください。")
@@ -12,4 +12,4 @@ export const contactSchema = z.object({
 });
 
 // バリデーションが型として使用出来いるように型の定義
-export type ContactType = z.infer<typeof contactSchema>;
+export type ContactType = z.infer<typeof ContactSchema>;

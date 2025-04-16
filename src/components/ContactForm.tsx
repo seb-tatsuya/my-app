@@ -1,12 +1,38 @@
 "use client";
 import { submitContactForm } from "@/lib/actions/contact";
-import { useActionState } from "react";
+import { ContactSchema } from "@/validations/contact";
+import { useActionState, useState } from "react";
+import { z } from "zod";
 
 export default function ContactForm() {
   const [state, formAction] = useActionState(submitContactForm, {
     success: false,
     errors: {},
   });
+
+  const [clientErrors, setClientErrors] = useState({ name: "", email: "" });
+
+  // バリデーションエラーをクライアント側で表示するための関数
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // name属性の値を取得
+    const { name, value } = e.target;
+
+    // name属性の値によってバリデーションを実行
+    try {
+      if (name === "name") {
+        ContactSchema.pick({ name: true }).parse({ name: value }); // zodのバリデーションを実行
+      } else if (name === "email") {
+        ContactSchema.pick({ email: true }).parse({ email: value }); // zodのバリデーションを実行
+      }
+      setClientErrors((prev) => ({ ...prev, [name]: "" })); // エラーが無ければ空にする
+    } catch (error) {
+      // zodのエラーをキャッチ
+      if (error instanceof z.ZodError) {
+        const errorMessage = error.errors[0]?.message || ""; // zodのエラーを取得
+        setClientErrors((prev) => ({ ...prev, [name]: errorMessage })); // エラーをセット
+      }
+    }
+  };
 
   return (
     <div>
@@ -23,6 +49,7 @@ export default function ContactForm() {
                 type="name"
                 id="name"
                 name="name"
+                onBlur={handleBlur}
                 className="w-full bg-white rounded border border-gray-300
 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none py-1 px-3 leading-8"
               />
@@ -30,6 +57,9 @@ focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none py-1 px-
                 <p className="text-red-500 text-sm mt-1">
                   {state.errors.name.join(",")}
                 </p>
+              )}
+              {clientErrors.name && (
+                <p className="text-red-500 text-sm mt-1">{clientErrors.name}</p>
               )}
             </div>
             <div className="mb-4">
@@ -40,12 +70,18 @@ focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none py-1 px-
                 type="email"
                 id="email"
                 name="email"
+                onBlur={handleBlur}
                 className="w-full bg-white rounded border border-gray-300
 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none py-1 px-3 leading-8"
               />
               {state.errors.email && (
                 <p className="text-red-500 text-sm mt-1">
                   {state.errors.email.join(",")}
+                </p>
+              )}
+              {clientErrors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {clientErrors.email}
                 </p>
               )}
             </div>

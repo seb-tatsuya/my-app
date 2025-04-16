@@ -1,6 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
-import { contactSchema } from "@/validations/contact";
+import { ContactSchema } from "@/validations/contact";
 
 // Action Stateの型定義
 type ActionState = {
@@ -18,7 +18,7 @@ export async function submitContactForm(
   const email = formData.get("email");
 
   // バリデーション
-  const validationResult = contactSchema.safeParse({ name, email }); // safeParseでバリデーションを実行
+  const validationResult = ContactSchema.safeParse({ name, email }); // safeParseでバリデーションを実行
   // バリデーションエラーがある場合
   if (!validationResult.success) {
     // エラーを取得、エラーはzodの型で取得できる
